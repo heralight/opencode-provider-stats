@@ -1,0 +1,55 @@
+{
+  "name": "opencode-provider-stats",
+  "version": "0.1.0",
+  "description": "Local provider/model performance statistics and live TPS meter for OpenCode.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tui": "./src/tui.tsx"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "opencode": ">=1.3.14"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.3.14",
+    "@opentui/core": "*",
+    "@opentui/solid": "*",
+    "solid-js": "*"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.3.14",
+    "@opentui/core": "*",
+    "@opentui/solid": "*",
+    "@types/node": "^22.0.0",
+    "solid-js": "*",
+    "typescript": "^5.8.0"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "llm",
+    "provider",
+    "benchmark",
+    "throughput",
+    "tps",
+    "ttft",
+    "latency"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heralight/opencode-provider-stats.git"
+  }
+}
