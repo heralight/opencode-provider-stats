@@ -41,18 +41,25 @@ type Aggregate = {
   totalCost: number
 }
 
-const DATA_DIR = path.join(os.homedir(), ".opencode")
-const DATA_FILE = path.join(DATA_DIR, "provider-stats.jsonl")
+function dataFile(): string {
+  return (
+    process.env.OPENCODE_PROVIDER_STATS_FILE ??
+    path.join(os.homedir(), ".opencode", "provider-stats.jsonl")
+  )
+}
 
 function ensureDataFile(): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true, mode: 0o700 })
+  const file = dataFile()
+  const dir = path.dirname(file)
 
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, "", { mode: 0o600 })
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 })
+
+  if (!fs.existsSync(file)) {
+    fs.writeFileSync(file, "", { mode: 0o600 })
   }
 
   try {
-    fs.chmodSync(DATA_FILE, 0o600)
+    fs.chmodSync(file, 0o600)
   } catch {
     // Some filesystems do not support POSIX modes.
   }
@@ -60,25 +67,34 @@ function ensureDataFile(): void {
 
 function appendEntry(entry: ProviderStatEntry): void {
   ensureDataFile()
-  fs.appendFileSync(DATA_FILE, `${JSON.stringify(entry)}\n`, {
-    encoding: "utf8",
-    mode: 0o600,
-  })
+
+  fs.appendFileSync(
+    dataFile(),
+    `${JSON.stringify(entry)}\n`,
+    {
+      encoding: "utf8",
+      mode: 0o600,
+    },
+  )
 }
 
 function readEntries(): ProviderStatEntry[] {
-  if (!fs.existsSync(DATA_FILE)) return []
+  const file = dataFile()
+
+  if (!fs.existsSync(file)) return []
 
   return fs
-    .readFileSync(DATA_FILE, "utf8")
+    .readFileSync(file, "utf8")
     .split("\n")
     .filter(Boolean)
     .flatMap((line) => {
       try {
         const value = JSON.parse(line) as ProviderStatEntry
+
         if (!value || typeof value !== "object") return []
         if (typeof value.providerID !== "string") return []
         if (typeof value.modelID !== "string") return []
+
         return [value]
       } catch {
         return []
@@ -249,6 +265,7 @@ const providerStatsTool = tool({
       .optional()
       .describe("Return raw metric rows instead of aggregates."),
   },
+
   async execute(args) {
     const entries = filterEntries(readEntries(), {
       provider: args.provider,
